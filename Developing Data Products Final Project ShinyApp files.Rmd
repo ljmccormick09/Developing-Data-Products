@@ -1,0 +1,85 @@
+---
+title: "Developing Data Products Final Project -Shiny app"
+author: "Lisa McCormick"
+date: "2024-01-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+#ui.R file
+
+library(shiny)
+
+# Define UI for application that predicts if there will be enough snowfall to call
+# it a white Christmas in Illinois county.
+fluidPage(
+  
+  # Application title
+  titlePanel("Will it be a White Christmas in Illinois?"),
+  
+  # Sidebar with input for County
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("County", "Choose a county:",
+                  c('Adams','Boone','Brown','Bureau','Carroll','Cass','Champaign', 
+                    'Christian','Clark','Clay','Clinton','Coles','Cook','Crawford', 
+                    'DeKalb','Douglas','DuPage','Edgar','Effingham','Fayette', 
+                    'Ford','Franklin','Fulton','Greene','Grundy','Hamilton','Hancock', 
+                    'Hardin','Henderson','Henry County','Iroquois','Jackson','Jasper','Jefferson', 
+                    'Jersey','Jo Daviess','Kane','Kankakee','Kendall','Knox','Lake', 
+                    'LaSalle','Lawrence','Lee','Livingston','Logan','Macon','Macoupin', 
+                    'Madison','Marion','Marshall','Mason','Massac','McDonough', 
+                    'McHenry','McLean','Menard','Mercer','Monroe','Morgan','Moultrie', 
+                    'Peoria','Perry','Piatt','Pike','Pulaski','Randolph','Richland', 
+                    'Rock Island','Sangamon','Shelby','St. Clair','Tazewell', 
+                    'Union','Vermillion','Wabash','Warren','Washington','Wayne', 
+                    'White County','Whiteside','Will','Winnebago','Woodford'))
+    ),
+    
+    mainPanel(textOutput("result"), textOutput("result2")
+    )
+  )
+)
+```
+
+
+
+```{r}
+
+#server.R file
+
+library(shiny)
+library(dplyr)
+library(stringr)
+
+MYDATATABLE <- read.csv("FinaldataIL2.csv", header=TRUE)
+
+MYDATATABLE[72,1] <- "St. Clair"
+MYDATATABLE[69,1] <- "Rock Island"
+MYDATATABLE[36,1] <- "Jo Daviess"
+
+MYDATATABLE[,'MeanPred'] <- round(MYDATATABLE[,'MeanPred'],2)
+MYDATATABLE[,'MeanPred'] <- as.character(MYDATATABLE[,'MeanPred'])
+
+function(input, output, session) {
+  
+  output$result <- renderText({
+    paste("You chose ", input$County, "County, IL.")
+  })
+  
+  output$result2 <- renderText({
+    paste("The probability of a white Christmas is ", MYDATATABLE %>% 
+            filter(str_detect(County, input$County)) %>% 
+            select(MeanPred), "%.")
+  })
+  
+}
+ 
+```
+
